@@ -881,9 +881,326 @@ You'll discover why many commonly used APIs are **not** actually part of the Jav
 
 ---
 
-## Section 4 — JavaScript Engine vs Browser
+---
 
-Understanding the difference.
+# Section 4 — JavaScript Engine vs Browser APIs
+
+> *"One of the biggest misconceptions among JavaScript developers is believing that everything they use belongs to JavaScript."*
+
+---
+
+## Learning Objectives
+
+By the end of this section, you will be able to:
+
+- Differentiate between the JavaScript language and Browser APIs.
+- Explain what the JavaScript Engine is responsible for.
+- Identify APIs that are provided by the browser.
+- Understand why JavaScript can run in different environments.
+- Answer common interview questions about Browser APIs.
+
+---
+
+# Introduction
+
+Consider the following code.
+
+```javascript
+console.log(window);
+console.log(document);
+console.log(localStorage);
+
+setTimeout(() => {
+    console.log("Hello");
+}, 1000);
+
+fetch("/users");
+```
+
+Most developers assume that everything above belongs to JavaScript.
+
+Surprisingly, that's not true.
+
+In reality, JavaScript itself knows nothing about:
+
+- `window`
+- `document`
+- `fetch()`
+- `setTimeout()`
+- `localStorage`
+- `alert()`
+- `navigator`
+
+These are **Browser APIs**.
+
+The JavaScript Engine simply executes your JavaScript code.
+
+The browser provides these APIs.
+
+Understanding this distinction is essential because the same JavaScript language can run in multiple environments—not just browsers.
+
+---
+
+# JavaScript vs Browser
+
+Think of JavaScript as a language specification.
+
+It defines concepts such as:
+
+- Variables
+- Functions
+- Objects
+- Arrays
+- Classes
+- Promises
+- Modules
+
+It **does not** define:
+
+- DOM
+- HTML
+- CSS
+- Network requests
+- Browser storage
+- Timers
+
+Those capabilities come from the environment hosting JavaScript.
+
+---
+
+# Browser APIs
+
+A browser exposes additional functionality to JavaScript through APIs.
+
+Some of the most commonly used Browser APIs include:
+
+| Browser API | Purpose |
+|-------------|---------|
+| `window` | Represents the browser window |
+| `document` | Accesses and manipulates the DOM |
+| `fetch()` | Makes HTTP requests |
+| `setTimeout()` | Schedules future execution |
+| `setInterval()` | Executes repeatedly |
+| `localStorage` | Stores persistent key-value data |
+| `sessionStorage` | Stores session-based data |
+| `navigator` | Provides browser information |
+| `history` | Browser navigation |
+| `location` | Current URL information |
+| `WebSocket` | Real-time communication |
+| `IndexedDB` | Client-side database |
+
+These APIs are available because the browser provides them—not because JavaScript defines them.
+
+---
+
+# The Relationship
+
+A simplified architecture looks like this:
+
+```text
+                Browser
+
+        ┌───────────────────────┐
+        │      Browser APIs      │
+        │                       │
+        │ window                │
+        │ document              │
+        │ fetch                 │
+        │ localStorage          │
+        │ setTimeout            │
+        │ navigator             │
+        └──────────┬────────────┘
+                   │
+                   ▼
+          JavaScript Engine
+                   │
+                   ▼
+          Executes JavaScript
+```
+
+Notice that the engine sits below the Browser APIs.
+
+When your code calls:
+
+```javascript
+setTimeout(() => {
+    console.log("Done");
+}, 1000);
+```
+
+The flow is roughly:
+
+1. JavaScript Engine encounters `setTimeout()`.
+2. Browser receives the request.
+3. Browser starts a timer.
+4. Once the timer expires, the callback is queued.
+5. The JavaScript Engine executes the callback when appropriate.
+
+The timer itself is **not** managed by the JavaScript Engine.
+
+---
+
+# Another Runtime, Same JavaScript
+
+Now consider Node.js.
+
+```javascript
+const fs = require("fs");
+
+fs.readFile("data.txt", () => {
+    console.log("Completed");
+});
+```
+
+Here:
+
+- There is no `window`.
+- There is no `document`.
+- There is no DOM.
+
+Instead, Node.js provides:
+
+- File System API
+- Process API
+- Buffer API
+- Stream API
+
+The JavaScript language remains the same.
+
+Only the runtime APIs change.
+
+This is why JavaScript is called a **hosted language**.
+
+---
+
+# Real-World Example
+
+In Angular, we often write:
+
+```typescript
+localStorage.setItem("theme", "dark");
+```
+
+Angular does not provide `localStorage`.
+
+The browser does.
+
+Similarly:
+
+```typescript
+window.scrollTo(0, 0);
+```
+
+Again:
+
+- Not Angular.
+- Not JavaScript.
+- Browser API.
+
+Understanding this helps when building applications that also run in environments like server-side rendering, where some browser APIs may not exist.
+
+---
+
+# Angular Connection
+
+Angular tries to reduce direct dependency on browser-specific APIs.
+
+For example, instead of manipulating the DOM directly:
+
+```typescript
+document.getElementById("title").innerHTML = "Hello";
+```
+
+Angular encourages using templates, bindings, or abstractions like `Renderer2`.
+
+Why?
+
+Because browser APIs may not be available in every execution environment.
+
+Keeping this separation improves portability and maintainability.
+
+---
+
+# Interview Perspective
+
+### Question
+
+**Is `setTimeout()` part of JavaScript?**
+
+❌ Common Answer
+
+> Yes.
+
+✅ Correct Answer
+
+No.
+
+`setTimeout()` is a Browser API (or a runtime API in environments like Node.js). JavaScript simply invokes it.
+
+---
+
+### Question
+
+**Who provides `document`?**
+
+Correct Answer:
+
+The browser provides the `document` object through the DOM API.
+
+The JavaScript Engine only executes code that accesses it.
+
+---
+
+### Question
+
+**Can JavaScript exist without the browser?**
+
+Yes.
+
+Examples include:
+
+- Node.js
+- Deno
+- Bun
+
+Each provides its own runtime APIs while executing the same JavaScript language.
+
+---
+
+# Common Mistakes
+
+❌ Thinking every global object belongs to JavaScript.
+
+❌ Assuming `fetch()` is part of ECMAScript.
+
+❌ Believing the JavaScript Engine manages timers.
+
+❌ Confusing Browser APIs with the JavaScript language.
+
+❌ Assuming Angular provides browser objects.
+
+---
+
+# Key Takeaways
+
+- JavaScript is a language specification.
+- The JavaScript Engine executes JavaScript.
+- The browser provides Browser APIs.
+- Different runtimes expose different APIs.
+- Angular applications depend on Browser APIs but do not create them.
+
+---
+
+## Next Section
+
+In **Section 5 — Popular JavaScript Engines**, we'll explore the engines that power modern JavaScript environments, including:
+
+- V8
+- SpiderMonkey
+- JavaScriptCore
+- Chakra (historical)
+- Why V8 became the industry standard
+- Why Node.js also uses V8
 
 ---
 
