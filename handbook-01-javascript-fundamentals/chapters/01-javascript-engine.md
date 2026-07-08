@@ -1204,12 +1204,392 @@ In **Section 5 — Popular JavaScript Engines**, we'll explore the engines that 
 
 ---
 
-## Section 5 — Popular JavaScript Engines
+---
 
-- V8
-- SpiderMonkey
-- JavaScriptCore
-- Chakra (historical overview)
+# Section 5 — Popular JavaScript Engines
+
+> *"JavaScript is one language, but it is executed by different engines depending on where it runs."*
+
+---
+
+## Learning Objectives
+
+By the end of this section, you will be able to:
+
+- Understand what a JavaScript Engine is.
+- Identify the major JavaScript Engines used today.
+- Explain why different browsers use different engines.
+- Understand why Node.js uses V8.
+- Explain why JavaScript behaves consistently across browsers.
+- Answer common interview questions about JavaScript Engines.
+
+---
+
+# Introduction
+
+By now, we know that JavaScript cannot execute itself.
+
+It always needs a **JavaScript Engine**.
+
+One question naturally follows.
+
+> **If every browser executes JavaScript, do they all use the same engine?**
+
+The answer is **No**.
+
+Each browser vendor has built its own JavaScript Engine.
+
+Although all engines execute JavaScript, they are implemented differently and optimized using different techniques.
+
+Despite these differences, they all aim to follow the **ECMAScript Specification**, ensuring that the same JavaScript program behaves consistently across environments.
+
+---
+
+# Why Are There Multiple JavaScript Engines?
+
+Imagine if every car manufacturer had to build the exact same engine.
+
+Innovation would stop.
+
+Instead, companies design their own engines while still following common standards.
+
+The same idea applies to browsers.
+
+The ECMAScript specification defines **how JavaScript should behave**, but it does **not** define **how a JavaScript Engine must be implemented**.
+
+This allows browser vendors to innovate and compete on performance, memory usage, and optimization strategies.
+
+---
+
+# Major JavaScript Engines
+
+Today, four JavaScript Engines are historically significant.
+
+| JavaScript Engine | Developed By | Used In | Status |
+|-------------------|--------------|---------|--------|
+| **V8** | Google | Chrome, Edge, Node.js, Deno, Bun (uses JavaScriptCore-derived parser? no—Bun embeds JavaScriptCore) | Widely Used |
+| **SpiderMonkey** | Mozilla | Firefox | Active |
+| **JavaScriptCore** | Apple | Safari | Active |
+| **Chakra** | Microsoft | Legacy Edge | Mostly Retired |
+
+> **Note:** Modern Microsoft Edge no longer uses Chakra. Since moving to Chromium, it uses **V8**.
+
+---
+
+# V8
+
+## Overview
+
+V8 is Google's JavaScript Engine.
+
+It was first released in **2008** as part of Google Chrome.
+
+Its primary goal was simple:
+
+> **Make JavaScript dramatically faster.**
+
+Before V8, JavaScript execution was significantly slower because most engines relied heavily on interpretation.
+
+V8 introduced aggressive optimization techniques that transformed JavaScript into a language capable of powering large-scale applications.
+
+Today, V8 powers:
+
+- Google Chrome
+- Microsoft Edge
+- Node.js
+- Electron applications
+- Many desktop applications
+- Several server-side JavaScript runtimes
+
+---
+
+## Why Is V8 So Popular?
+
+Several reasons contributed to V8's popularity.
+
+### High Performance
+
+V8 continuously analyzes running code and optimizes frequently executed functions.
+
+This makes JavaScript significantly faster during long-running applications.
+
+---
+
+### Memory Management
+
+V8 includes sophisticated Garbage Collection algorithms that automatically reclaim unused memory.
+
+This reduces memory leaks and improves application stability.
+
+---
+
+### Open Source
+
+Google made V8 open source.
+
+This allowed other projects, including Node.js, to adopt it.
+
+---
+
+### Continuous Improvement
+
+Every year, Google's V8 team introduces new optimizations.
+
+Modern versions include multiple execution tiers that balance startup speed with runtime performance.
+
+We'll explore these execution stages later in this chapter.
+
+---
+
+# SpiderMonkey
+
+SpiderMonkey is Mozilla's JavaScript Engine.
+
+It was the **first JavaScript Engine ever created**.
+
+Originally developed by **Brendan Eich**, the creator of JavaScript, it powers Mozilla Firefox.
+
+Like V8, SpiderMonkey implements the ECMAScript specification but uses its own internal architecture and optimization techniques.
+
+---
+
+# JavaScriptCore
+
+JavaScriptCore is Apple's JavaScript Engine.
+
+It powers:
+
+- Safari
+- WebKit-based browsers
+- Many Apple platforms
+
+JavaScriptCore focuses heavily on performance and energy efficiency, which is especially important for mobile devices.
+
+---
+
+# Chakra
+
+Chakra was Microsoft's JavaScript Engine for the original Microsoft Edge browser.
+
+After Microsoft adopted Chromium, Edge switched to V8.
+
+Although Chakra is no longer the primary engine for Edge, it remains an important part of JavaScript history.
+
+---
+
+# One Language, Multiple Engines
+
+Although different engines exist, developers usually do not need to write separate JavaScript for each browser.
+
+Why?
+
+Because every engine aims to follow the **ECMAScript Specification**.
+
+Consider this code:
+
+```javascript
+const numbers = [10, 20, 30];
+
+console.log(numbers.length);
+```
+
+Whether this runs in:
+
+- Chrome
+- Firefox
+- Safari
+- Node.js
+
+the result is the same:
+
+```text
+3
+```
+
+The engines may execute the code differently internally, but the observable behavior should remain consistent.
+
+---
+
+# Why Doesn't Every Engine Work Exactly the Same Way?
+
+The ECMAScript specification defines **behavior**, not **implementation**.
+
+Think of it like an examination.
+
+Every student receives the same questions.
+
+Each student may solve them differently.
+
+Similarly,
+
+Every JavaScript Engine receives the same language specification.
+
+Each engine is free to implement its own parser, optimizer, compiler, and memory management techniques.
+
+This competition encourages innovation and improves JavaScript performance across the ecosystem.
+
+---
+
+# Which Engine Should Angular Developers Learn?
+
+For most Angular developers, the answer is:
+
+> **V8**
+
+Why?
+
+Because:
+
+- Google Chrome is widely used for development.
+- Microsoft Edge also uses V8.
+- Angular CLI development commonly happens in Chromium-based browsers.
+- Server-side rendering with Node.js also uses V8.
+
+Understanding V8 provides knowledge that applies to both client-side and server-side Angular applications.
+
+That said, remember that Angular itself is **not tied to V8**. An Angular application can also run in Firefox (SpiderMonkey) or Safari (JavaScriptCore), provided the browser supports the required web standards.
+
+---
+
+# Real-World Example
+
+Imagine you're developing an Angular application.
+
+During development:
+
+```text
+Angular Source Code
+        │
+        ▼
+TypeScript Compiler
+        │
+        ▼
+JavaScript Bundle
+        │
+        ▼
+Chrome Browser
+        │
+        ▼
+V8 Executes JavaScript
+```
+
+If the same application is opened in Firefox:
+
+```text
+Angular Source Code
+        │
+        ▼
+JavaScript Bundle
+        │
+        ▼
+Firefox Browser
+        │
+        ▼
+SpiderMonkey Executes JavaScript
+```
+
+The application remains the same.
+
+Only the JavaScript Engine changes.
+
+---
+
+# Interview Perspective
+
+### Question
+
+**Which JavaScript Engine does Google Chrome use?**
+
+**Answer:**
+
+V8.
+
+---
+
+### Question
+
+**Which JavaScript Engine does Firefox use?**
+
+**Answer:**
+
+SpiderMonkey.
+
+---
+
+### Question
+
+**Which JavaScript Engine does Safari use?**
+
+**Answer:**
+
+JavaScriptCore.
+
+---
+
+### Question
+
+**Does Node.js have its own JavaScript Engine?**
+
+**Answer:**
+
+No.
+
+Node.js embeds Google's **V8** engine and provides additional runtime APIs for server-side development.
+
+---
+
+### Question
+
+**Why can the same JavaScript code run in different browsers?**
+
+**Answer:**
+
+Because modern JavaScript Engines implement the ECMAScript specification, ensuring consistent language behavior even though their internal implementations differ.
+
+---
+
+# Common Mistakes
+
+❌ Thinking JavaScript has only one engine.
+
+❌ Assuming Chrome created the JavaScript language.
+
+❌ Believing Node.js has a unique JavaScript Engine.
+
+❌ Confusing the ECMAScript specification with a JavaScript Engine.
+
+❌ Assuming all engines use the same internal architecture.
+
+---
+
+# Key Takeaways
+
+- JavaScript is one language but has multiple engine implementations.
+- Different browsers use different JavaScript Engines.
+- V8 powers Chrome, Edge, and Node.js.
+- Firefox uses SpiderMonkey.
+- Safari uses JavaScriptCore.
+- All major engines implement the ECMAScript specification.
+- Angular applications can run on any compliant JavaScript Engine.
+
+---
+
+## Next Section
+
+In **Section 6 — Inside the V8 Engine**, we'll move beyond names and begin exploring the internal architecture of the world's most widely used JavaScript Engine.
+
+We'll cover:
+
+- V8 architecture
+- Ignition Interpreter
+- Sparkplug
+- TurboFan
+- Maglev
+- Just-In-Time (JIT) Compilation
+- Hidden Classes
+- Inline Caching
+
+This is where we start looking inside the engine itself.
 
 ---
 
