@@ -464,9 +464,420 @@ In **Section 3**, we'll explore **Browser Architecture** and answer an important
 
 ---
 
-## Section 3 — Browser Architecture
+---
 
-How browsers are organized internally.
+# Section 3 — Browser Architecture
+
+> *"Before understanding where the JavaScript Engine lives, we must first understand how a modern browser is designed."*
+
+---
+
+## Learning Objectives
+
+By the end of this section, you will be able to:
+
+- Understand what a browser actually is.
+- Identify the major components of a modern browser.
+- Explain the responsibilities of each browser process.
+- Understand where the JavaScript Engine lives.
+- Explain why browsers use multiple processes.
+- Connect browser architecture with Angular applications.
+
+---
+
+# Introduction
+
+Most developers think of a browser as a simple application that displays websites.
+
+When you open Google Chrome, Microsoft Edge, Firefox, or Safari, it feels like a single program.
+
+In reality, a browser is an extremely complex piece of software consisting of multiple independent processes working together.
+
+Each process has a specific responsibility.
+
+This architecture allows browsers to remain:
+
+- Fast
+- Secure
+- Stable
+- Responsive
+
+Understanding browser architecture is important because your Angular application spends its entire life inside one of these browser processes.
+
+---
+
+# What Happens When You Open a Website?
+
+Suppose you visit:
+
+```
+https://angular.dev
+```
+
+The sequence is much more complicated than simply downloading HTML.
+
+A simplified version looks like this:
+
+```text
+You Enter URL
+        │
+        ▼
+Browser Receives Request
+        │
+        ▼
+DNS Lookup
+        │
+        ▼
+HTTP/HTTPS Request
+        │
+        ▼
+Server Returns Response
+        │
+        ▼
+Browser Starts Rendering
+        │
+        ▼
+HTML Parsing
+        │
+        ▼
+CSS Parsing
+        │
+        ▼
+JavaScript Execution
+        │
+        ▼
+DOM Construction
+        │
+        ▼
+Page Rendering
+```
+
+Every one of these steps involves different browser components working together.
+
+---
+
+# Browser Architecture Overview
+
+A modern Chromium-based browser (such as Chrome or Edge) is divided into multiple processes.
+
+```text
+                Browser
+
+                    │
+
+     ┌──────────────┼──────────────┐
+     │              │              │
+     ▼              ▼              ▼
+
+Browser Process  Renderer      GPU Process
+                  Process
+
+                    │
+
+        ┌───────────┼────────────┐
+        │           │            │
+
+        ▼           ▼            ▼
+
+HTML Parser   CSS Engine   JavaScript Engine
+
+                    │
+
+                    ▼
+
+            Rendering Engine
+```
+
+This diagram is simplified, but it gives a good mental model.
+
+---
+
+# Browser Process
+
+The Browser Process acts as the coordinator.
+
+It is responsible for managing the browser itself.
+
+Responsibilities include:
+
+- Opening and closing tabs
+- Address bar
+- Navigation
+- Bookmarks
+- Downloads
+- Browser history
+- Permissions
+- Cookies
+- Communication with other processes
+
+Think of it as the "manager" of the browser.
+
+It does **not** execute your Angular application.
+
+---
+
+# Renderer Process
+
+The Renderer Process is the most important process for frontend developers.
+
+Every web page is rendered inside a renderer process.
+
+Its responsibilities include:
+
+- Parsing HTML
+- Parsing CSS
+- Building the DOM
+- Executing JavaScript
+- Calculating layouts
+- Painting pixels
+- Handling user interactions
+
+This is where your Angular application lives.
+
+Everything you write in Angular eventually executes inside the Renderer Process.
+
+---
+
+# Inside the Renderer Process
+
+The Renderer Process itself contains several important subsystems.
+
+```text
+Renderer Process
+
+├── HTML Parser
+├── CSS Engine
+├── JavaScript Engine
+├── DOM
+├── Rendering Engine
+├── Layout Engine
+└── Paint System
+```
+
+Each subsystem has a dedicated responsibility.
+
+For example:
+
+- HTML Parser builds the DOM.
+- CSS Engine calculates styles.
+- JavaScript Engine executes your JavaScript.
+- Rendering Engine paints the page.
+
+---
+
+# GPU Process
+
+Modern browsers also include a dedicated GPU Process.
+
+Its job is to:
+
+- Render animations
+- Accelerate graphics
+- Draw complex visual effects
+- Improve scrolling performance
+- Handle compositing
+
+This keeps rendering smooth even when the CPU is busy.
+
+---
+
+# Network Process
+
+The Network Process handles communication with servers.
+
+Responsibilities include:
+
+- HTTP requests
+- HTTPS requests
+- WebSocket connections
+- DNS lookups
+- SSL/TLS
+- Downloading images
+- Downloading JavaScript bundles
+- Downloading CSS files
+
+Whenever your Angular application calls:
+
+```typescript
+this.http.get(...)
+```
+
+the browser's networking infrastructure is ultimately responsible for sending that request.
+
+---
+
+# Storage
+
+Modern browsers also manage persistent storage.
+
+Examples include:
+
+- Cookies
+- localStorage
+- sessionStorage
+- IndexedDB
+- Cache Storage
+
+These APIs are provided by the browser—not by JavaScript itself.
+
+---
+
+# Where Does the JavaScript Engine Live?
+
+This is one of the most common interview questions.
+
+The JavaScript Engine is located inside the **Renderer Process**.
+
+```text
+Browser
+
+└── Renderer Process
+
+        ├── HTML Parser
+
+        ├── CSS Engine
+
+        ├── JavaScript Engine
+
+        ├── DOM
+
+        └── Rendering Engine
+```
+
+The engine is responsible only for executing JavaScript.
+
+It does **not**:
+
+- Draw the screen
+- Build the DOM
+- Download resources
+- Paint pixels
+
+Those tasks belong to other browser components.
+
+---
+
+# Why Multiple Processes?
+
+Older browsers often used a single process.
+
+This created several problems.
+
+If one tab crashed,
+
+the entire browser crashed.
+
+Modern browsers isolate work into separate processes.
+
+Benefits include:
+
+## Stability
+
+If one tab crashes,
+
+other tabs continue running.
+
+---
+
+## Security
+
+Each renderer process runs inside a sandbox.
+
+This limits the damage malicious websites can cause.
+
+---
+
+## Performance
+
+Different browser components can work simultaneously.
+
+For example:
+
+- Downloading files
+- Executing JavaScript
+- Rendering animations
+
+can all happen independently.
+
+---
+
+# Angular Connection
+
+When an Angular application starts:
+
+1. The Network Process downloads your bundled JavaScript.
+2. The Renderer Process parses HTML.
+3. CSS is processed.
+4. The JavaScript Engine executes Angular.
+5. Angular creates components.
+6. Angular updates the DOM.
+7. The Rendering Engine paints the UI.
+
+Understanding this flow helps explain why large bundles, heavy JavaScript execution, or expensive rendering can slow down an Angular application.
+
+---
+
+# Interview Perspective
+
+### Question
+
+**Where does JavaScript actually execute inside the browser?**
+
+Incorrect answer:
+
+> Inside Chrome.
+
+Better answer:
+
+> JavaScript executes inside the JavaScript Engine, which runs within the browser's Renderer Process. The Renderer Process also handles HTML parsing, CSS processing, DOM creation, layout, and rendering.
+
+---
+
+### Question
+
+**Does the JavaScript Engine build the DOM?**
+
+Answer:
+
+No.
+
+The HTML Parser constructs the DOM.
+
+The JavaScript Engine interacts with the DOM through Browser APIs.
+
+---
+
+# Common Mistakes
+
+❌ Thinking the browser is a single process.
+
+❌ Believing JavaScript builds the DOM.
+
+❌ Assuming the JavaScript Engine performs rendering.
+
+❌ Confusing Browser APIs with the JavaScript Engine.
+
+❌ Assuming Angular controls browser rendering.
+
+---
+
+# Key Takeaways
+
+- Modern browsers are multi-process applications.
+- Your Angular application runs inside the Renderer Process.
+- The JavaScript Engine is only one component of the Renderer Process.
+- HTML parsing, CSS processing, rendering, networking, and storage are handled by different browser components.
+- Understanding browser architecture helps explain application performance, debugging, and rendering behavior.
+
+---
+
+## Next Section
+
+In **Section 4 — JavaScript Engine vs Browser APIs**, we'll answer another interview favorite:
+
+> **"Is `setTimeout()` part of JavaScript?"**
+
+You'll discover why many commonly used APIs are **not** actually part of the JavaScript language.
 
 ---
 
