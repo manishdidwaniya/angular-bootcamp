@@ -3959,9 +3959,442 @@ In **Section 11 — Memory Management & Garbage Collection (Introduction)**, we'
 
 ---
 
-## Section 11 — Practice Exercises
+---
 
-Exercises and thought questions.
+# Section 11 — Memory Management & Garbage Collection (Introduction)
+
+> *"Every variable you declare and every object you create occupies memory. Understanding how the JavaScript Engine manages that memory is essential for writing efficient applications and avoiding memory leaks."*
+
+---
+
+## Learning Objectives
+
+After completing this section, you will be able to:
+
+- Understand why memory management is important.
+- Learn how JavaScript allocates memory.
+- Understand the difference between Stack Memory and Heap Memory.
+- Learn what Garbage Collection is.
+- Understand why memory leaks happen.
+- Relate memory management concepts to Angular applications.
+
+---
+
+# Introduction
+
+Whenever you write JavaScript code, memory is required.
+
+Consider the following example:
+
+```javascript
+const username = "Manish";
+
+const user = {
+    id: 1,
+    city: "Raipur"
+};
+
+function greet() {
+    console.log(username);
+}
+```
+
+Where are these values stored?
+
+Who allocates memory?
+
+Who removes the memory after it is no longer needed?
+
+Unlike languages such as C or C++, JavaScript developers do not manually allocate or free memory.
+
+Instead, the **JavaScript Engine automatically manages memory** for us.
+
+This automatic management is one of JavaScript's greatest strengths.
+
+---
+
+# Why Does JavaScript Need Memory?
+
+Memory is required to store:
+
+- Variables
+- Functions
+- Objects
+- Arrays
+- Strings
+- Numbers
+- Classes
+- Closures
+- Execution Contexts
+
+Without memory, JavaScript programs would have nowhere to store data while executing.
+
+---
+
+# Memory Lifecycle
+
+Every value in JavaScript follows a simple lifecycle.
+
+```text
+Create Value
+      │
+      ▼
+Allocate Memory
+      │
+      ▼
+Use the Value
+      │
+      ▼
+Value Becomes Unreachable
+      │
+      ▼
+Garbage Collector Frees Memory
+```
+
+This entire process is handled automatically by the JavaScript Engine.
+
+---
+
+# Memory Allocation
+
+Whenever JavaScript creates a value, the engine allocates memory.
+
+Example:
+
+```javascript
+let age = 25;
+```
+
+Memory is allocated for:
+
+- Variable name → `age`
+- Value → `25`
+
+Similarly:
+
+```javascript
+const user = {
+    name: "Manish"
+};
+```
+
+Memory is allocated for:
+
+- Variable reference
+- Object
+- Object properties
+- String values
+
+---
+
+# Two Main Memory Areas
+
+The JavaScript Engine primarily uses two memory regions:
+
+```text
+Memory
+
+├── Stack
+│
+└── Heap
+```
+
+Each serves a different purpose.
+
+---
+
+# Stack Memory
+
+The **Stack** is used for small, short-lived data.
+
+Typically, it stores:
+
+- Primitive values (implementation detail varies by engine)
+- Function call information
+- Execution Contexts
+- References to heap objects
+
+Think of the stack as a stack of plates.
+
+```text
+Top
+
+┌──────────────┐
+│ Function C   │
+├──────────────┤
+│ Function B   │
+├──────────────┤
+│ Function A   │
+└──────────────┘
+
+Bottom
+```
+
+The last function added is the first one removed.
+
+This behavior is called **LIFO (Last In, First Out).**
+
+---
+
+# Heap Memory
+
+The **Heap** stores larger and dynamically allocated data.
+
+Examples include:
+
+- Objects
+- Arrays
+- Functions
+- Maps
+- Sets
+- Large strings
+
+Example:
+
+```javascript
+const user = {
+    name: "Manish",
+    age: 27
+};
+```
+
+The object itself is stored in the Heap.
+
+The variable `user` refers to that object.
+
+---
+
+# Stack vs Heap
+
+| Stack | Heap |
+|--------|------|
+| Faster access | Slightly slower |
+| Stores execution information | Stores objects and dynamic data |
+| Automatically grows and shrinks with function calls | Managed by the Garbage Collector |
+| Organized | More flexible |
+
+> **Note:** This is a simplified mental model. Modern JavaScript engines optimize memory in sophisticated ways, and the exact storage strategy is an implementation detail.
+
+---
+
+# Example
+
+```javascript
+let age = 25;
+
+let person = {
+    name: "Manish"
+};
+```
+
+Conceptually:
+
+```text
+Stack
+
+age ─────────────► 25
+
+person ──────────┐
+                 │
+                 ▼
+
+Heap
+
+Object
+│
+├── name
+└── "Manish"
+```
+
+The variable stores a reference to the object, while the object itself resides in heap memory.
+
+---
+
+# What is Garbage Collection?
+
+Imagine a classroom.
+
+Students write notes on the board.
+
+Eventually the notes are no longer needed.
+
+Someone has to erase them.
+
+Otherwise, the board becomes full.
+
+Garbage Collection works in a similar way.
+
+When an object is no longer reachable by the program, the JavaScript Engine can reclaim its memory.
+
+This prevents memory from growing indefinitely.
+
+---
+
+# Example
+
+```javascript
+function demo() {
+
+    const message = "Temporary";
+
+}
+
+demo();
+```
+
+After `demo()` finishes executing, `message` is no longer accessible.
+
+Since nothing can reference it anymore, its memory becomes eligible for Garbage Collection.
+
+---
+
+# Reachability
+
+Modern JavaScript Engines determine whether memory can be reclaimed by checking **reachability**.
+
+If an object can still be reached from the running program, it must remain in memory.
+
+If it becomes unreachable, it can eventually be removed.
+
+Example:
+
+```javascript
+let user = {
+    name: "Manish"
+};
+
+user = null;
+```
+
+After assigning `null`, the original object is no longer referenced.
+
+Eventually, the Garbage Collector may reclaim its memory.
+
+---
+
+# Memory Leaks
+
+Automatic Garbage Collection does **not** mean memory leaks are impossible.
+
+A memory leak occurs when objects remain reachable even though they are no longer useful.
+
+Common causes include:
+
+- Forgotten event listeners
+- Global variables
+- Long-lived timers
+- Closures retaining unnecessary data
+- Cached objects that are never cleared
+
+We'll study memory leaks in detail later.
+
+---
+
+# Angular Connection
+
+Memory management is especially important in Angular applications.
+
+Examples of common memory leaks include:
+
+```typescript
+this.subscription = this.userService.users$.subscribe();
+```
+
+If the subscription is never cleaned up (where appropriate), it can keep objects alive longer than intended.
+
+Other examples include:
+
+- Event listeners that are not removed
+- Intervals that continue running
+- Detached DOM references
+- Services holding unnecessary data
+
+Understanding how the JavaScript Engine manages memory makes these issues easier to diagnose.
+
+---
+
+# Real-World Example
+
+Imagine an e-commerce application.
+
+Every product loaded from the server creates JavaScript objects.
+
+```javascript
+products.push(product);
+```
+
+If products are continuously added but never removed when no longer needed, memory usage grows.
+
+Eventually:
+
+- Performance decreases.
+- Garbage Collection becomes more frequent.
+- The application may feel sluggish.
+
+Good application design helps avoid unnecessary memory retention.
+
+---
+
+# Interview Perspective
+
+### Question
+
+**Who allocates memory in JavaScript?**
+
+Answer:
+
+The JavaScript Engine automatically allocates memory whenever values, objects, functions, or other runtime data are created.
+
+---
+
+### Question
+
+**Who frees memory in JavaScript?**
+
+Answer:
+
+The JavaScript Engine's Garbage Collector automatically reclaims memory occupied by objects that are no longer reachable.
+
+---
+
+### Question
+
+**What is the difference between Stack and Heap?**
+
+A concise answer:
+
+> The Stack stores execution contexts and other short-lived execution data, while the Heap stores dynamically allocated objects and other complex data structures. The Heap is managed by the Garbage Collector.
+
+---
+
+# Common Mistakes
+
+❌ Thinking JavaScript developers manually free memory.
+
+❌ Assuming Garbage Collection happens immediately.
+
+❌ Believing every object is removed as soon as a function ends.
+
+❌ Confusing Stack Memory with Heap Memory.
+
+❌ Assuming automatic memory management eliminates all memory leaks.
+
+---
+
+# Key Takeaways
+
+- JavaScript automatically manages memory.
+- Values are allocated memory when created.
+- The Stack and Heap serve different purposes.
+- The Garbage Collector reclaims memory that is no longer reachable.
+- Memory leaks are still possible when references are unintentionally retained.
+- Understanding memory management is essential for building performant Angular applications.
+
+---
+
+## Next Section
+
+In **Section 12 — Angular Connection & Why JavaScript Engine Knowledge Matters**, we'll bring everything together and see how JavaScript Engine concepts directly influence Angular topics such as Change Detection, Signals, Zone.js, performance optimization, debugging, and interview discussions.
 
 ---
 
