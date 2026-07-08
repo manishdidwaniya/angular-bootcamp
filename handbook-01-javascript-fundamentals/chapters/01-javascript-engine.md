@@ -2002,9 +2002,446 @@ In **Section 7 — Parsing & Tokenization**, we'll zoom into the **Parser** and 
 
 ---
 
-## Section 7 — How JavaScript Code Executes
+---
 
-From source code to execution.
+# Section 7 — Parsing & Tokenization
+
+> *"Before a JavaScript Engine can execute your code, it must first understand what you have written."*
+
+---
+
+## Learning Objectives
+
+After completing this section, you will be able to:
+
+- Understand what parsing is.
+- Explain what tokenization means.
+- Understand lexical analysis.
+- Differentiate source code from tokens.
+- Explain why parsing happens before execution.
+- Understand why syntax errors occur before a program runs.
+- Connect parsing with the next stage: the Abstract Syntax Tree (AST).
+
+---
+
+# Introduction
+
+Imagine someone gives you a book written in a language you've never seen before.
+
+Before understanding the meaning of the sentences, you must first:
+
+- Identify individual words.
+- Recognize punctuation.
+- Understand sentence structure.
+- Verify that the grammar is correct.
+
+A JavaScript Engine behaves in a very similar way.
+
+When you write JavaScript, the engine does **not** immediately execute it.
+
+Instead, it first tries to understand the program.
+
+This understanding process begins with **Parsing**.
+
+---
+
+# What is Parsing?
+
+Parsing is the process of reading JavaScript source code and verifying that it follows the rules of the JavaScript language.
+
+For example:
+
+```javascript
+const username = "Manish";
+
+console.log(username);
+```
+
+To us, this looks like two simple lines.
+
+To the JavaScript Engine, it is merely a sequence of characters.
+
+The engine must determine:
+
+- Is this valid JavaScript?
+- Are all keywords used correctly?
+- Are brackets balanced?
+- Are strings properly closed?
+- Are operators in valid positions?
+
+Only after answering these questions can execution continue.
+
+---
+
+# Why Can't the Engine Execute Source Code Directly?
+
+Consider this code:
+
+```javascript
+const age = 25;
+```
+
+To us, it clearly means:
+
+> Create a constant variable called `age` and assign it the value `25`.
+
+But to a computer, the source code initially looks like nothing more than characters:
+
+```text
+c
+o
+n
+s
+t
+
+a
+g
+e
+
+=
+
+2
+5
+;
+```
+
+The engine must organize these characters into meaningful units.
+
+This process is called **Tokenization**.
+
+---
+
+# What is Tokenization?
+
+Tokenization is the process of breaking source code into small meaningful pieces called **tokens**.
+
+Think of tokens as the vocabulary of a programming language.
+
+For the following code:
+
+```javascript
+const age = 25;
+```
+
+The engine generates tokens similar to:
+
+```text
+KEYWORD      -> const
+
+IDENTIFIER   -> age
+
+OPERATOR     -> =
+
+NUMBER        -> 25
+
+SEMICOLON    -> ;
+```
+
+Instead of reading one character at a time, the parser now understands the program as a collection of meaningful language elements.
+
+---
+
+# Visualizing Tokenization
+
+Source Code:
+
+```javascript
+const age = 25;
+```
+
+↓
+
+Characters
+
+```text
+c o n s t a g e = 2 5 ;
+```
+
+↓
+
+Tokens
+
+```text
+KEYWORD
+
+IDENTIFIER
+
+ASSIGNMENT OPERATOR
+
+NUMERIC LITERAL
+
+SEMICOLON
+```
+
+↓
+
+Parser continues with the next stage.
+
+---
+
+# Common Types of Tokens
+
+JavaScript contains many different token types.
+
+| Token Type | Example |
+|------------|---------|
+| Keyword | `const`, `let`, `if`, `return` |
+| Identifier | `user`, `age`, `calculateTotal` |
+| Operator | `+`, `-`, `*`, `/`, `=` |
+| Literal | `"Hello"`, `25`, `true` |
+| Separator | `(`, `)`, `{`, `}`, `[`, `]` |
+| Punctuation | `;`, `,`, `.` |
+
+These tokens become the building blocks of every JavaScript program.
+
+---
+
+# Lexical Analysis
+
+Tokenization is part of a broader process called **Lexical Analysis**.
+
+During lexical analysis, the engine scans the source code from left to right.
+
+Its responsibilities include:
+
+- Reading characters.
+- Grouping characters into tokens.
+- Identifying keywords.
+- Identifying identifiers.
+- Recognizing operators.
+- Ignoring unnecessary whitespace.
+- Ignoring comments.
+
+For example:
+
+```javascript
+// User information
+
+const age = 25;
+```
+
+The comment is ignored during execution, while the remaining code is converted into tokens.
+
+---
+
+# Why Parsing Happens Before Execution
+
+Consider this invalid program:
+
+```javascript
+const user = ;
+```
+
+What should the engine execute?
+
+There is no value after the assignment operator.
+
+Instead of executing partial code, the parser immediately reports:
+
+```text
+SyntaxError: Unexpected token ';'
+```
+
+Execution never starts.
+
+This is why syntax errors are called **parse-time errors**.
+
+The program fails before any JavaScript is executed.
+
+---
+
+# Another Example
+
+Valid code:
+
+```javascript
+function greet() {
+    console.log("Hello");
+}
+```
+
+Invalid code:
+
+```javascript
+function greet( {
+    console.log("Hello");
+}
+```
+
+The parser detects the missing parenthesis and stops the program immediately.
+
+---
+
+# Parsing Is Not Execution
+
+This distinction is extremely important.
+
+Many beginners believe parsing and execution happen together.
+
+They do not.
+
+The engine first checks:
+
+- Is the code valid?
+- Can it understand the program?
+
+Only after successful parsing does execution begin.
+
+Think of it like compiling an examination paper before grading it.
+
+If the paper is unreadable, grading cannot begin.
+
+---
+
+# Real-World Example
+
+Consider this Angular component:
+
+```typescript
+@Component({
+  selector: 'app-user'
+})
+export class UserComponent {
+
+    name = "Manish";
+
+    greet() {
+        console.log(this.name);
+    }
+
+}
+```
+
+Before this reaches the browser:
+
+1. TypeScript is transpiled into JavaScript.
+2. Angular bundles the application.
+3. The browser downloads the bundle.
+4. V8 begins parsing the JavaScript.
+5. Tokens are generated.
+6. The parser validates the syntax.
+7. Only then can execution continue.
+
+Even a tiny syntax error in the generated JavaScript would stop execution before Angular starts.
+
+---
+
+# Angular Connection
+
+Although Angular developers primarily write TypeScript, the browser never executes TypeScript directly.
+
+The workflow is:
+
+```text
+TypeScript
+
+      │
+
+      ▼
+
+Angular Compiler
+
+      │
+
+      ▼
+
+JavaScript
+
+      │
+
+      ▼
+
+Parser
+
+      │
+
+      ▼
+
+Tokens
+
+      │
+
+      ▼
+
+Abstract Syntax Tree
+
+      │
+
+      ▼
+
+Execution
+```
+
+Everything eventually passes through the JavaScript parser.
+
+---
+
+# Interview Perspective
+
+### Question
+
+**What is parsing?**
+
+A strong answer:
+
+> Parsing is the process by which the JavaScript Engine analyzes source code, validates its syntax, and prepares an internal representation that can later be executed.
+
+---
+
+### Question
+
+**What is tokenization?**
+
+A strong answer:
+
+> Tokenization is the process of breaking JavaScript source code into small meaningful units called tokens, such as keywords, identifiers, operators, literals, and punctuation.
+
+---
+
+### Question
+
+**Does JavaScript execute before parsing?**
+
+Answer:
+
+No.
+
+Parsing always occurs before execution.
+
+If parsing fails, execution never begins.
+
+---
+
+# Common Mistakes
+
+❌ Thinking parsing means execution.
+
+❌ Assuming tokenization is optional.
+
+❌ Believing syntax errors occur during execution.
+
+❌ Confusing characters with tokens.
+
+❌ Assuming comments become part of the executable program.
+
+---
+
+# Key Takeaways
+
+- Parsing is the first major stage after the engine receives source code.
+- The parser validates JavaScript syntax.
+- Tokenization converts source code into meaningful language tokens.
+- Lexical analysis identifies keywords, identifiers, operators, literals, and punctuation.
+- Syntax errors are detected before execution begins.
+- Parsing prepares the program for the creation of the Abstract Syntax Tree (AST).
+
+---
+
+## Next Section
+
+In **Section 8 — Abstract Syntax Tree (AST)**, we'll see how the parser transforms tokens into a tree-like structure that represents the entire program.
+
+The AST is one of the most important internal data structures in every modern JavaScript Engine and forms the foundation for interpretation, compilation, optimization, and code execution.
 
 ---
 
