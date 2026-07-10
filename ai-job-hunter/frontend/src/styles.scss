@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-primary: #00e5a0;
+  --brand-primary-dim: rgba(0, 229, 160, 0.12);
+  --surface-bg: #0a0e17;
+  --surface-elevated: #111827;
+  --surface-card: #1a2236;
+  --text-primary: #e8ecf4;
+  --text-muted: #8896b0;
+  --border-color: #1e2a42;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface-elevated); }
+::-webkit-scrollbar-thumb { background: #2d3f5e; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+/* Angular Material 暗色主题覆盖 */
+.mat-mdc-card {
+  background: var(--surface-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+}
+
+.mat-mdc-form-field {
+  .mdc-text-field--filled {
+    background: var(--surface-card) !important;
+  }
+}
+
+.mat-mdc-button-base {
+  font-family: 'Space Grotesk', sans-serif !important;
+}
