@@ -1,8 +1,8 @@
 /** 认证路由守卫 — 保护需要登录的路由。 */
 
-import { CanActivateFn, Router } from '@angular/router';
-import { inject } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { CanActivateFn, Router } from "@angular/router";
+import { inject } from "@angular/core";
+import { AuthService } from "../services/auth.service";
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
@@ -12,7 +12,7 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
-  router.navigate(['/auth/login']);
+  router.navigate(["/auth/login"]);
   return false;
 };
 
@@ -25,6 +25,6 @@ export const adminGuard: CanActivateFn = () => {
     return true;
   }
 
-  router.navigate(['/dashboard']);
+  router.navigate(["/dashboard"]);
   return false;
 };

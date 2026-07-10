@@ -1,17 +1,17 @@
-"""initial schema
+"""initial_schema
 
-Revision ID: 5aabed90b684
-Revises:
-Create Date: 2026-07-10 17:55:16.481784
+Revision ID: 4cd6b23641fb
+Revises: 
+Create Date: 2026-07-10 21:21:29.230253
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+ 
 
 # revision identifiers
-revision: str = '5aabed90b684'
+revision: str = '4cd6b23641fb'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,6 +29,10 @@ def upgrade() -> None:
     sa.Column('last_health_check', sa.String(length=50), nullable=True),
     sa.Column('health_status', sa.String(length=20), nullable=False),
     sa.Column('rate_limit_per_minute', sa.Integer(), nullable=False),
+    sa.Column('last_sync_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('last_success_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('last_error', sa.Text(), nullable=True),
+    sa.Column('jobs_found', sa.Integer(), nullable=False),
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
@@ -78,33 +82,25 @@ def upgrade() -> None:
     sa.Column('experience_min', sa.Float(), nullable=True),
     sa.Column('experience_max', sa.Float(), nullable=True),
     sa.Column('job_type', sa.String(length=50), nullable=True),
-    sa.Column('posted_at', sa.String(length=50), nullable=True),
+    sa.Column('posted_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('expires_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('last_seen_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('fingerprint', sa.String(length=64), nullable=False),
+    sa.Column('source_metadata', sa.JSON(), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_duplicate', sa.Boolean(), nullable=False),
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.ForeignKeyConstraint(['provider_id'], ['providers.id'], name=op.f('fk_jobs_provider_id_providers')),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_jobs'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_jobs')),
+    sa.UniqueConstraint('fingerprint', name='uq_jobs_fingerprint'),
+    sa.UniqueConstraint('provider_id', 'external_id', name='uq_jobs_provider_external')
     )
     op.create_index(op.f('ix_jobs_company'), 'jobs', ['company'], unique=False)
+    op.create_index(op.f('ix_jobs_fingerprint'), 'jobs', ['fingerprint'], unique=False)
+    op.create_index(op.f('ix_jobs_posted_at'), 'jobs', ['posted_at'], unique=False)
     op.create_index(op.f('ix_jobs_title'), 'jobs', ['title'], unique=False)
-    op.create_table('notifications',
-    sa.Column('user_id', sa.String(length=36), nullable=False),
-    sa.Column('channel', sa.String(length=50), nullable=False),
-    sa.Column('title', sa.String(length=500), nullable=False),
-    sa.Column('message', sa.Text(), nullable=False),
-    sa.Column('is_read', sa.Boolean(), nullable=False),
-    sa.Column('is_sent', sa.Boolean(), nullable=False),
-    sa.Column('sent_at', sa.String(length=50), nullable=True),
-    sa.Column('error_message', sa.Text(), nullable=True),
-    sa.Column('metadata_json', sa.Text(), nullable=True),
-    sa.Column('id', sa.String(length=36), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_notifications_user_id_users'), ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_notifications'))
-    )
     op.create_table('profiles',
     sa.Column('user_id', sa.String(length=36), nullable=False),
     sa.Column('headline', sa.String(length=500), nullable=True),
@@ -141,6 +137,28 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_searches_user_id_users'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_searches'))
     )
+    op.create_table('user_settings',
+    sa.Column('user_id', sa.String(length=36), nullable=False),
+    sa.Column('freshness_days', sa.Integer(), nullable=False),
+    sa.Column('min_match_score', sa.Float(), nullable=False),
+    sa.Column('search_terms', sa.JSON(), nullable=False),
+    sa.Column('locations', sa.JSON(), nullable=False),
+    sa.Column('work_modes', sa.JSON(), nullable=False),
+    sa.Column('email_enabled', sa.Boolean(), nullable=False),
+    sa.Column('telegram_enabled', sa.Boolean(), nullable=False),
+    sa.Column('slack_enabled', sa.Boolean(), nullable=False),
+    sa.Column('discord_enabled', sa.Boolean(), nullable=False),
+    sa.Column('telegram_chat_id', sa.String(length=255), nullable=True),
+    sa.Column('slack_webhook_url', sa.String(length=1000), nullable=True),
+    sa.Column('discord_webhook_url', sa.String(length=1000), nullable=True),
+    sa.Column('last_notified_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('id', sa.String(length=36), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_user_settings_user_id_users'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_user_settings')),
+    sa.UniqueConstraint('user_id', name=op.f('uq_user_settings_user_id'))
+    )
     op.create_table('job_skills',
     sa.Column('job_id', sa.String(length=36), nullable=False),
     sa.Column('skill_id', sa.String(length=36), nullable=False),
@@ -148,6 +166,25 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['job_id'], ['jobs.id'], name=op.f('fk_job_skills_job_id_jobs'), ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['skill_id'], ['skills.id'], name=op.f('fk_job_skills_skill_id_skills'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('job_id', 'skill_id', name=op.f('pk_job_skills'))
+    )
+    op.create_table('notifications',
+    sa.Column('user_id', sa.String(length=36), nullable=False),
+    sa.Column('job_id', sa.String(length=36), nullable=True),
+    sa.Column('channel', sa.String(length=50), nullable=False),
+    sa.Column('title', sa.String(length=500), nullable=False),
+    sa.Column('message', sa.Text(), nullable=False),
+    sa.Column('is_read', sa.Boolean(), nullable=False),
+    sa.Column('is_sent', sa.Boolean(), nullable=False),
+    sa.Column('sent_at', sa.String(length=50), nullable=True),
+    sa.Column('error_message', sa.Text(), nullable=True),
+    sa.Column('metadata_json', sa.Text(), nullable=True),
+    sa.Column('id', sa.String(length=36), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.ForeignKeyConstraint(['job_id'], ['jobs.id'], name=op.f('fk_notifications_job_id_jobs'), ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_notifications_user_id_users'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_notifications')),
+    sa.UniqueConstraint('user_id', 'job_id', 'channel', name='uq_notifications_user_job_channel')
     )
     op.create_table('profile_skills',
     sa.Column('profile_id', sa.String(length=36), nullable=False),
@@ -211,11 +248,14 @@ def downgrade() -> None:
     op.drop_table('target_roles')
     op.drop_table('resumes')
     op.drop_table('profile_skills')
+    op.drop_table('notifications')
     op.drop_table('job_skills')
+    op.drop_table('user_settings')
     op.drop_table('searches')
     op.drop_table('profiles')
-    op.drop_table('notifications')
     op.drop_index(op.f('ix_jobs_title'), table_name='jobs')
+    op.drop_index(op.f('ix_jobs_posted_at'), table_name='jobs')
+    op.drop_index(op.f('ix_jobs_fingerprint'), table_name='jobs')
     op.drop_index(op.f('ix_jobs_company'), table_name='jobs')
     op.drop_table('jobs')
     op.drop_index(op.f('ix_users_email'), table_name='users')

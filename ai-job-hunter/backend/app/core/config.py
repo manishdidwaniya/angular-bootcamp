@@ -25,6 +25,19 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # Job ingestion and freshness
+    JOB_FRESHNESS_DAYS: int = 7
+    JOB_SYNC_INTERVAL_MINUTES: int = 30
+    JOB_SYNC_PAGES_PER_PROVIDER: int = 2
+    SCHEDULER_ENABLED: bool = True
+    ENABLE_LIVE_PROVIDERS: bool = True
+
+    # Optional provider credentials
+    ADZUNA_APP_ID: str = ""
+    ADZUNA_APP_KEY: str = ""
+    ADZUNA_COUNTRY: str = "in"
+    THEMUSE_API_KEY: str = ""
+
     # JWT
     JWT_SECRET: str = "change-me-in-production"
     JWT_ALGORITHM: str = "HS256"
@@ -48,6 +61,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
 
     # AI
     OPENAI_API_KEY: str = ""

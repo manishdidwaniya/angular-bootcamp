@@ -51,6 +51,8 @@ class ProfileUpdate(BaseModel):
     ignored_companies: list[str] | None = None
     certifications: list[str] | None = None
     languages: list[str] | None = None
+    skills: list[SkillInput] | None = None
+    target_roles: list[TargetRoleInput] | None = None
 
 
 class SkillRead(BaseModel):

@@ -31,7 +31,10 @@ class JobRead(BaseModel):
     experience_min: float | None
     experience_max: float | None
     job_type: str | None
-    posted_at: str | None
+    posted_at: datetime
+    expires_at: datetime | None
+    source: str
+    age_hours: float
     is_active: bool
     skills: list[JobSkillRead]
     created_at: datetime
@@ -51,6 +54,7 @@ class JobMatchResult(BaseModel):
 
 class JobSearchFilters(BaseModel):
     query: str | None = None
+    company: str | None = None
     location: str | None = None
     work_mode: str | None = None
     salary_min: int | None = None
@@ -58,8 +62,9 @@ class JobSearchFilters(BaseModel):
     job_type: str | None = None
     provider_ids: list[str] | None = None
     skills: list[str] | None = None
-    posted_within_days: int | None = None
+    posted_within_days: int | None = Field(default=7, ge=1, le=30)
     min_score: float | None = Field(default=None, ge=0, le=100)
+    sort_by: str = Field(default="newest", pattern="^(newest|salary)$")
 
 
 class PaginatedResponse(BaseModel):

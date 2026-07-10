@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.dependencies import get_current_user, get_db
 from app.core.exceptions import NotFoundException
@@ -39,6 +40,11 @@ def application_payload(application: Application) -> dict[str, Any]:
         "ai_match_score": application.ai_match_score,
         "created_at": application.created_at,
         "updated_at": application.updated_at,
+        "job": {
+            "title": application.job.title,
+            "company": application.job.company,
+            "url": application.job.url,
+        },
     }
 
 
@@ -49,6 +55,7 @@ async def list_applications(
 ) -> list[dict[str, Any]]:
     result = await db.execute(
         select(Application)
+        .options(selectinload(Application.job))
         .where(Application.user_id == str(user.id))
         .order_by(Application.created_at.desc())
     )
@@ -66,7 +73,7 @@ async def create_application(
     application = Application(user_id=str(user.id), **data.model_dump())
     db.add(application)
     await db.flush()
-    await db.refresh(application)
+    await db.refresh(application, attribute_names=["job"])
     return application_payload(application)
 
 
@@ -78,7 +85,9 @@ async def update_application(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     result = await db.execute(
-        select(Application).where(
+        select(Application)
+        .options(selectinload(Application.job))
+        .where(
             Application.id == application_id,
             Application.user_id == str(user.id),
         )

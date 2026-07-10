@@ -20,7 +20,7 @@ export interface Profile {
   headline: string | null;
   summary: string | null;
   location: string | null;
-  work_mode_preference: 'remote' | 'hybrid' | 'onsite' | null;
+  work_mode_preference: "remote" | "hybrid" | "onsite" | null;
   min_salary: number | null;
   max_salary: number | null;
   salary_currency: string;

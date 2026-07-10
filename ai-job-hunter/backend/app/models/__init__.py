@@ -7,6 +7,7 @@ from app.models.profile import Profile, TargetRole, profile_skills_table
 from app.models.provider import Provider
 from app.models.resume import Resume
 from app.models.search import Search
+from app.models.settings import UserSettings
 from app.models.skill import Skill
 from app.models.user import User
 
@@ -21,6 +22,7 @@ __all__ = [
     "Application",
     "Notification",
     "Search",
+    "UserSettings",
     "job_skills_table",
     "profile_skills_table",
 ]

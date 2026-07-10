@@ -1,8 +1,9 @@
-import { Routes } from '@angular/router';
-import { FeaturePageComponent } from '../shared/pages/feature-page.component';
+import { Routes } from "@angular/router";
+import { ApplicationsComponent } from "./applications.component";
 
-export const APPLICATIONS_ROUTES: Routes = [{
-  path: '',
-  component: FeaturePageComponent,
-  data: { title: 'Applications', description: 'Track applications from submission through interview, offer, or closure.' },
-}];
+export const APPLICATIONS_ROUTES: Routes = [
+  {
+    path: "",
+    component: ApplicationsComponent,
+  },
+];

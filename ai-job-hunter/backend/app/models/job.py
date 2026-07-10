@@ -1,8 +1,21 @@
 """Job 和 JobSkill 模型。"""
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -25,6 +38,10 @@ job_skills_table = Table(
 
 class Job(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "jobs"
+    __table_args__ = (
+        UniqueConstraint("provider_id", "external_id", name="uq_jobs_provider_external"),
+        UniqueConstraint("fingerprint", name="uq_jobs_fingerprint"),
+    )
 
     provider_id: Mapped[str] = mapped_column(String(36), ForeignKey("providers.id"), nullable=False)
     external_id: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -45,12 +62,16 @@ class Job(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     job_type: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )  # full-time, part-time, contract
-    posted_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    fingerprint: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    source_metadata: Mapped[dict[str, object]] = mapped_column(JSON, default=dict, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_duplicate: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # 关系
-    provider: Mapped["Provider"] = relationship("Provider", back_populates="jobs")
+    provider: Mapped["Provider"] = relationship("Provider", back_populates="jobs", lazy="selectin")
     skills: Mapped[list["Skill"]] = relationship(
         "Skill", secondary=job_skills_table, lazy="selectin"
     )

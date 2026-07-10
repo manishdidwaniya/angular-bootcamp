@@ -1,8 +1,9 @@
 /** 主布局组件 — 侧边栏 + 顶栏 + 内容区。 */
 
-import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '@core/services/auth.service';
+import { Component, OnInit, inject, signal } from "@angular/core";
+import { RouterOutlet, RouterLink, RouterLinkActive } from "@angular/router";
+import { AuthService } from "@core/services/auth.service";
+import { NotificationService } from "@core/services/notification.service";
 
 interface NavItem {
   label: string;
@@ -11,9 +12,9 @@ interface NavItem {
 }
 
 @Component({
-    selector: 'ajh-layout',
-    imports: [RouterOutlet, RouterLink, RouterLinkActive],
-    template: `
+  selector: "ajh-layout",
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  template: `
     <div class="flex h-screen overflow-hidden">
       <!-- 侧边栏 -->
       <aside
@@ -25,7 +26,9 @@ interface NavItem {
         <!-- Logo -->
         <div class="p-5 border-b border-[var(--border-color)]">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-brand-300 flex items-center justify-center">
+            <div
+              class="w-9 h-9 rounded-lg bg-brand-300 flex items-center justify-center"
+            >
               <i class="fa-solid fa-crosshairs text-surface-900 text-sm"></i>
             </div>
             <span class="font-bold text-lg tracking-tight">AI Job Hunter</span>
@@ -61,16 +64,35 @@ interface NavItem {
       <!-- 主内容 -->
       <div class="flex-1 flex flex-col overflow-hidden">
         <!-- 顶栏 -->
-        <header class="h-14 bg-surface-800 border-b border-[var(--border-color)] flex items-center px-6 gap-4 flex-shrink-0">
-          <button (click)="sidebarOpen.set(!sidebarOpen())" class="lg:hidden text-[var(--text-muted)]">
+        <header
+          class="h-14 bg-surface-800 border-b border-[var(--border-color)] flex items-center px-6 gap-4 flex-shrink-0"
+        >
+          <button
+            (click)="sidebarOpen.set(!sidebarOpen())"
+            class="lg:hidden text-[var(--text-muted)]"
+          >
             <i class="fa-solid fa-bars"></i>
           </button>
           <div class="flex-1"></div>
           <!-- 通知图标 -->
-          <button class="relative text-[var(--text-muted)] hover:text-white transition-colors">
+          <a
+            routerLink="/notifications"
+            (click)="notifications.refresh()"
+            aria-label="Open notifications"
+            class="relative text-[var(--text-muted)] hover:text-white transition-colors"
+          >
             <i class="fa-solid fa-bell text-lg"></i>
-            <span class="absolute -top-1 -right-1 w-4 h-4 bg-brand-300 rounded-full text-[10px] text-surface-900 flex items-center justify-center font-bold">3</span>
-          </button>
+            @if (notifications.unreadCount() > 0) {
+              <span
+                class="absolute -top-2 -right-2 min-w-4 h-4 px-1 bg-brand-300 rounded-full text-[10px] text-surface-900 flex items-center justify-center font-bold"
+                >{{
+                  notifications.unreadCount() > 99
+                    ? "99+"
+                    : notifications.unreadCount()
+                }}</span
+              >
+            }
+          </a>
         </header>
 
         <!-- 内容 -->
@@ -79,20 +101,27 @@ interface NavItem {
         </main>
       </div>
     </div>
-  `
+  `,
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   authService = inject(AuthService);
+  readonly notifications = inject(NotificationService);
   sidebarOpen = signal(window.innerWidth >= 1024);
 
+  ngOnInit(): void {
+    this.notifications.refresh();
+  }
+
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard', route: '/dashboard', icon: 'fa-chart-line' },
-    { label: 'Jobs', route: '/jobs', icon: 'fa-briefcase' },
-    { label: 'Profiles', route: '/profiles', icon: 'fa-user-pen' },
-    { label: 'Applications', route: '/applications', icon: 'fa-paper-plane' },
-    { label: 'Analytics', route: '/analytics', icon: 'fa-chart-pie' },
-    { label: 'Notifications', route: '/notifications', icon: 'fa-bell' },
-    { label: 'Settings', route: '/settings', icon: 'fa-gear' },
-    { label: 'Admin', route: '/admin', icon: 'fa-shield-halved' },
+    { label: "Dashboard", route: "/dashboard", icon: "fa-chart-line" },
+    { label: "Jobs", route: "/jobs", icon: "fa-briefcase" },
+    { label: "Profiles", route: "/profiles", icon: "fa-user-pen" },
+    { label: "Resumes", route: "/resumes", icon: "fa-file-lines" },
+    { label: "Job Sources", route: "/providers", icon: "fa-satellite-dish" },
+    { label: "Applications", route: "/applications", icon: "fa-paper-plane" },
+    { label: "Analytics", route: "/analytics", icon: "fa-chart-pie" },
+    { label: "Notifications", route: "/notifications", icon: "fa-bell" },
+    { label: "Settings", route: "/settings", icon: "fa-gear" },
+    { label: "Admin", route: "/admin", icon: "fa-shield-halved" },
   ];
 }

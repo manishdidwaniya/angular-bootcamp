@@ -11,7 +11,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ajh_user}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-ajh_user} -d ${POSTGRES_DB:-ai_job_hunter}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,6 +42,13 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ajh_user}:${POSTGRES_PASSWORD:-ajh_dev_pass}@postgres:5432/${POSTGRES_DB:-ai_job_hunter}
       REDIS_URL: redis://redis:6379/0
       ENVIRONMENT: development
+      JOB_FRESHNESS_DAYS: ${JOB_FRESHNESS_DAYS:-7}
+      JOB_SYNC_INTERVAL_MINUTES: ${JOB_SYNC_INTERVAL_MINUTES:-30}
+      JOB_SYNC_PAGES_PER_PROVIDER: ${JOB_SYNC_PAGES_PER_PROVIDER:-2}
+      ADZUNA_APP_ID: ${ADZUNA_APP_ID:-}
+      ADZUNA_APP_KEY: ${ADZUNA_APP_KEY:-}
+      ADZUNA_COUNTRY: ${ADZUNA_COUNTRY:-in}
+      THEMUSE_API_KEY: ${THEMUSE_API_KEY:-}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     depends_on:

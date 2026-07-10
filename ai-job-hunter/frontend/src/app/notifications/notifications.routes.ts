@@ -1,8 +1,9 @@
-import { Routes } from '@angular/router';
-import { FeaturePageComponent } from '../shared/pages/feature-page.component';
+import { Routes } from "@angular/router";
+import { NotificationsComponent } from "./notifications.component";
 
-export const NOTIFICATIONS_ROUTES: Routes = [{
-  path: '',
-  component: FeaturePageComponent,
-  data: { title: 'Notifications', description: 'Review in-app alerts and configure email, Telegram, Slack, or Discord delivery.' },
-}];
+export const NOTIFICATIONS_ROUTES: Routes = [
+  {
+    path: "",
+    component: NotificationsComponent,
+  },
+];

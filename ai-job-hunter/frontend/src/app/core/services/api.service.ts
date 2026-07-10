@@ -1,11 +1,11 @@
 /** 基础 API 服务 — 封装 HTTP 通信。 */
 
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '@environments/environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "@environments/environment";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ApiService {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;

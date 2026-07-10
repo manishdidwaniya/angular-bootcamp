@@ -7,7 +7,7 @@ export interface Job {
   title: string;
   company: string;
   location: string | null;
-  work_mode: 'remote' | 'hybrid' | 'onsite' | null;
+  work_mode: "remote" | "hybrid" | "onsite" | null;
   salary_min: number | null;
   salary_max: number | null;
   salary_currency: string | null;
@@ -16,8 +16,11 @@ export interface Job {
   company_url: string | null;
   experience_min: number | null;
   experience_max: number | null;
-  job_type: 'full-time' | 'part-time' | 'contract' | 'internship' | null;
+  job_type: "full-time" | "part-time" | "contract" | "internship" | null;
   posted_at: string | null;
+  expires_at: string | null;
+  source: string;
+  age_hours: number;
   is_active: boolean;
   skills: JobSkill[];
   created_at: string;
@@ -26,7 +29,7 @@ export interface Job {
 export interface JobSkill {
   id: string;
   name: string;
-  is_required: boolean;
+  category: string | null;
 }
 
 export interface JobMatchResult {
@@ -35,7 +38,7 @@ export interface JobMatchResult {
   explanation: string;
   strengths: string[];
   missing_skills: string[];
-  recommendation: 'strong_match' | 'good_match' | 'weak_match' | 'skip';
+  recommendation: "strong_match" | "good_match" | "weak_match" | "skip";
   suggested_resume_id: string | null;
 }
 

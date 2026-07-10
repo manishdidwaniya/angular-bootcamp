@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, ForeignKey, String, Text
+from sqlalchemy import Boolean, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -14,9 +14,15 @@ if TYPE_CHECKING:
 
 class Notification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "notifications"
+    __table_args__ = (
+        UniqueConstraint("user_id", "job_id", "channel", name="uq_notifications_user_job_channel"),
+    )
 
     user_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    job_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("jobs.id", ondelete="CASCADE"), nullable=True
     )
     channel: Mapped[str] = mapped_column(
         String(50), nullable=False

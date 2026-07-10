@@ -1,8 +1,9 @@
 """Provider 模型 — 可插拔的职位数据源。"""
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, String
+from sqlalchemy import Boolean, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -24,6 +25,10 @@ class Provider(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     last_health_check: Mapped[str | None] = mapped_column(String(50), nullable=True)
     health_status: Mapped[str] = mapped_column(String(20), default="unknown", nullable=False)
     rate_limit_per_minute: Mapped[int] = mapped_column(default=30, nullable=False)
+    last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_success_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    jobs_found: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # 关系
     jobs: Mapped[list["Job"]] = relationship("Job", back_populates="provider", lazy="selectin")

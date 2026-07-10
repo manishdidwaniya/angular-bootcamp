@@ -1,5 +1,6 @@
 """Profile 业务逻辑。"""
 
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ConflictException, NotFoundException
@@ -67,6 +68,7 @@ class ProfileService:
 
         await self.db.flush()
         await self.db.refresh(profile)
+        await self.db.refresh(profile, attribute_names=["skills", "target_roles"])
         return profile
 
     async def get_by_user_id(self, user_id: str) -> Profile:
@@ -80,12 +82,40 @@ class ProfileService:
         """更新用户档案。"""
         profile = await self.get_by_user_id(user_id)
         update_data = data.model_dump(exclude_unset=True)
+        skills = update_data.pop("skills", None)
+        target_roles = update_data.pop("target_roles", None)
 
         for key, value in update_data.items():
             setattr(profile, key, value)
 
+        if skills is not None:
+            await self.db.execute(
+                delete(profile_skills_table).where(
+                    profile_skills_table.c.profile_id == str(profile.id)
+                )
+            )
+            for skill_data in skills:
+                skill = await self._get_or_create_skill(skill_data["name"])
+                await self.db.execute(
+                    profile_skills_table.insert().values(
+                        profile_id=str(profile.id),
+                        skill_id=str(skill.id),
+                        proficiency_level=skill_data.get("proficiency_level", "intermediate"),
+                        years_of_experience=skill_data.get("years_of_experience", 0),
+                    )
+                )
+
+        if target_roles is not None:
+            await self.db.execute(
+                delete(TargetRole).where(TargetRole.profile_id == str(profile.id))
+            )
+            for role_data in target_roles:
+                self.db.add(TargetRole(profile_id=str(profile.id), **role_data))
+
         await self.db.flush()
         await self.db.refresh(profile)
+        if skills is not None or target_roles is not None:
+            await self.db.refresh(profile, attribute_names=["skills", "target_roles"])
         return profile
 
     async def _get_or_create_skill(self, name: str, category: str | None = None) -> Skill:

@@ -1,33 +1,33 @@
 /** 认证服务 — 处理登录、注册、token 管理。 */
 
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
+import { Injectable, computed, inject, signal } from "@angular/core";
+import { Observable } from "rxjs";
+import { ApiService } from "./api.service";
 import {
   User,
   UserWithTokens,
   LoginRequest,
   RegisterRequest,
-} from '../models/user.model';
+} from "../models/user.model";
 
-const TOKEN_KEY = 'ajh_access_token';
-const REFRESH_KEY = 'ajh_refresh_token';
-const USER_KEY = 'ajh_user';
+const TOKEN_KEY = "ajh_access_token";
+const REFRESH_KEY = "ajh_refresh_token";
+const USER_KEY = "ajh_user";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class AuthService {
   private api = inject(ApiService);
 
   readonly currentUser = signal<User | null>(this.loadUser());
   readonly isLoggedIn = computed(() => !!this.currentUser());
-  readonly isAdmin = computed(() => this.currentUser()?.role === 'admin');
+  readonly isAdmin = computed(() => this.currentUser()?.role === "admin");
 
   register(data: RegisterRequest): Observable<UserWithTokens> {
-    return this.api.post<UserWithTokens>('/auth/register', data);
+    return this.api.post<UserWithTokens>("/auth/register", data);
   }
 
   login(data: LoginRequest): Observable<UserWithTokens> {
-    return this.api.post<UserWithTokens>('/auth/login', data);
+    return this.api.post<UserWithTokens>("/auth/login", data);
   }
 
   logout(): void {

@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.database.base import Base
 from app.database.session import engine
+from app.scheduler import start_job_scheduler
 
 
 @asynccontextmanager
@@ -21,8 +22,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if not settings.is_production:
         async with engine.begin() as connection:
             await connection.run_sync(Base.metadata.create_all)
+    scheduler = start_job_scheduler()
     yield
     # 关闭
+    if scheduler is not None:
+        scheduler.shutdown(wait=False)
     await engine.dispose()
     print("AI Job Hunter shut down.")
 

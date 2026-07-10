@@ -10,6 +10,8 @@ from app.api.v1.endpoints import (
     notifications,
     profiles,
     providers,
+    resumes,
+    settings,
     users,
 )
 
@@ -20,6 +22,8 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(profiles.router, prefix="/profiles", tags=["profiles"])
 api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 api_router.include_router(providers.router, prefix="/providers", tags=["providers"])
+api_router.include_router(resumes.router, prefix="/resumes", tags=["resumes"])
 api_router.include_router(applications.router, prefix="/applications", tags=["applications"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+api_router.include_router(settings.router, prefix="/settings", tags=["settings"])

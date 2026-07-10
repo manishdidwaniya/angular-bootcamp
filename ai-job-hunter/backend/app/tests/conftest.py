@@ -14,7 +14,7 @@ from app.main import app
 # 测试数据库
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
-test_engine = create_async_engine(TEST_DATABASE_URL, echo=True)
+test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 TestSessionLocal = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 

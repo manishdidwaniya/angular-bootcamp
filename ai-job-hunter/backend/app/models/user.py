@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from app.models.notification import Notification
     from app.models.profile import Profile
     from app.models.search import Search
+    from app.models.settings import UserSettings
 
 
 class UserRole(str, enum.Enum):
@@ -52,4 +53,7 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
     searches: Mapped[list["Search"]] = relationship(
         "Search", back_populates="user", lazy="selectin"
+    )
+    settings: Mapped["UserSettings | None"] = relationship(
+        "UserSettings", back_populates="user", uselist=False, lazy="selectin"
     )
